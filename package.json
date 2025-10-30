@@ -1,0 +1,21 @@
+{
+  "name": "stock-management",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "backend:dev": "pnpm --filter backend start:dev",
+    "frontend:dev": "pnpm --filter frontend dev",
+    "dev": "concurrently \"pnpm run backend:dev\" \"pnpm run frontend:dev\"",
+    "build": "pnpm run build:backend && pnpm run build:frontend",
+    "build:backend": "pnpm --filter backend build",
+    "build:frontend": "pnpm --filter frontend build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  }
+}
