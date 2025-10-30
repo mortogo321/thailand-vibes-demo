@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
-import { Modal, Form, Input, InputNumber, DatePicker, message } from 'antd';
+import { useEffect, useState } from 'react';
+import { Modal, Form, Input, InputNumber, DatePicker, message, Button } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import { observer } from 'mobx-react-lite';
 import { portfolioStore } from '../stores/PortfolioStore';
 import type { Portfolio, CreatePortfolioDto } from '../types';
+import StockSearchModal from './StockSearchModal';
 import dayjs from 'dayjs';
 
 interface PortfolioModalProps {
@@ -13,6 +15,7 @@ interface PortfolioModalProps {
 
 const PortfolioModal = observer(({ visible, portfolio, onClose }: PortfolioModalProps) => {
   const [form] = Form.useForm();
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
   const isEditing = !!portfolio;
 
   useEffect(() => {
@@ -58,8 +61,16 @@ const PortfolioModal = observer(({ visible, portfolio, onClose }: PortfolioModal
     onClose();
   };
 
+  const handleStockSelect = (stock: any) => {
+    form.setFieldsValue({
+      symbol: stock.symbol,
+      companyName: stock.name,
+    });
+  };
+
   return (
-    <Modal
+    <>
+      <Modal
       title={isEditing ? 'Edit Stock' : 'Add Stock to Portfolio'}
       open={visible}
       onOk={handleSubmit}
@@ -82,7 +93,22 @@ const PortfolioModal = observer(({ visible, portfolio, onClose }: PortfolioModal
             { pattern: /^[A-Za-z]+$/, message: 'Only letters allowed' },
           ]}
         >
-          <Input placeholder="e.g., AAPL" style={{ textTransform: 'uppercase' }} />
+          <Input
+            placeholder="e.g., AAPL"
+            style={{ textTransform: 'uppercase' }}
+            suffix={
+              !isEditing && (
+                <Button
+                  type="link"
+                  icon={<SearchOutlined />}
+                  onClick={() => setSearchModalVisible(true)}
+                  size="small"
+                >
+                  Search
+                </Button>
+              )
+            }
+          />
         </Form.Item>
 
         <Form.Item
@@ -135,6 +161,13 @@ const PortfolioModal = observer(({ visible, portfolio, onClose }: PortfolioModal
         </Form.Item>
       </Form>
     </Modal>
+
+    <StockSearchModal
+      visible={searchModalVisible}
+      onClose={() => setSearchModalVisible(false)}
+      onSelect={handleStockSelect}
+    />
+    </>
   );
 });
 

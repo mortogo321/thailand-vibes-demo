@@ -10,7 +10,9 @@
     "start:prod": "node dist/main",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
-    "format": "biome format --write src"
+    "format": "biome format --write src",
+    "seed": "ts-node src/database/seed.ts",
+    "db:clear": "ts-node src/database/clear.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
