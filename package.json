@@ -14,8 +14,8 @@
     "format": "biome format --write ."
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "concurrently": "^8.2.2",
-    "typescript": "^5.3.3"
+    "@biomejs/biome": "^2.4.6",
+    "concurrently": "^9.2.0",
+    "typescript": "^5.9.3"
   }
 }
