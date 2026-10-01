@@ -1,32 +1,31 @@
-import { useEffect, useState } from 'react';
-import { observer } from 'mobx-react-lite';
-import { useNavigate } from 'react-router-dom';
 import {
-  Card,
-  Table,
-  Button,
-  Space,
-  Tag,
-  Popconfirm,
-  message,
-  Typography,
-  Statistic,
-  Row,
-  Col,
-} from 'antd';
-import {
-  PlusOutlined,
-  EditOutlined,
   DeleteOutlined,
+  EditOutlined,
   EyeOutlined,
+  PlusOutlined,
   RiseOutlined,
-  FallOutlined,
 } from '@ant-design/icons';
+import {
+  Button,
+  Card,
+  Col,
+  message,
+  Popconfirm,
+  Row,
+  Space,
+  Statistic,
+  Table,
+  Tag,
+  Typography,
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
+import { observer } from 'mobx-react-lite';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import PortfolioModal from '../components/PortfolioModal';
 import { portfolioStore } from '../stores/PortfolioStore';
 import type { Portfolio } from '../types';
-import PortfolioModal from '../components/PortfolioModal';
-import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
 
@@ -53,7 +52,7 @@ const PortfolioPage = observer(() => {
     try {
       await portfolioStore.deletePortfolio(id);
       message.success('Stock removed from portfolio');
-    } catch (error) {
+    } catch {
       message.error('Failed to remove stock');
     }
   };
@@ -98,7 +97,7 @@ const PortfolioPage = observer(() => {
       title: 'Total Investment',
       key: 'totalInvestment',
       align: 'right',
-      render: (_: any, record: Portfolio) => (
+      render: (_unknown: unknown, record: Portfolio) => (
         <Text strong style={{ color: '#1890ff' }}>
           ${(record.shares * record.purchasePrice).toFixed(2)}
         </Text>
@@ -108,15 +107,14 @@ const PortfolioPage = observer(() => {
       title: 'Purchase Date',
       dataIndex: 'purchaseDate',
       key: 'purchaseDate',
-      render: (date: string) =>
-        date ? dayjs(date).format('MMM DD, YYYY') : '-',
+      render: (date: string) => (date ? dayjs(date).format('MMM DD, YYYY') : '-'),
     },
     {
       title: 'Actions',
       key: 'actions',
       align: 'center',
       width: 180,
-      render: (_: any, record: Portfolio) => (
+      render: (_unknown: unknown, record: Portfolio) => (
         <Space size="small">
           <Button
             type="primary"
@@ -126,11 +124,7 @@ const PortfolioPage = observer(() => {
           >
             View
           </Button>
-          <Button
-            icon={<EditOutlined />}
-            size="small"
-            onClick={() => handleEdit(record)}
-          />
+          <Button icon={<EditOutlined />} size="small" onClick={() => handleEdit(record)} />
           <Popconfirm
             title="Remove from portfolio?"
             description="Are you sure you want to remove this stock?"
@@ -147,7 +141,7 @@ const PortfolioPage = observer(() => {
 
   const totalInvestment = portfolioStore.portfolios.reduce(
     (sum, p) => sum + p.shares * p.purchasePrice,
-    0
+    0,
   );
 
   const totalStocks = portfolioStore.portfolios.length;
@@ -185,12 +179,7 @@ const PortfolioPage = observer(() => {
           </Title>
         }
         extra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleAdd}
-            size="large"
-          >
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd} size="large">
             Add Stock
           </Button>
         }

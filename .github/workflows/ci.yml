@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    name: lint + typecheck + test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install root deps
+        run: bun install --frozen-lockfile
+      - name: Biome check
+        run: bun run lint
+      - name: Backend typecheck
+        run: bun --filter backend typecheck
+        working-directory: .
+      - name: Frontend typecheck
+        run: bun --filter frontend typecheck
+      - name: Backend tests
+        run: bun --filter backend test
+      - name: Frontend tests
+        run: bun --filter frontend test
+
+  build:
+    name: build backend + frontend
+    runs-on: ubuntu-24.04
+    needs: quality
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install all workspaces
+        run: bun install --frozen-lockfile
+      - name: Build backend
+        run: bun --filter backend build
+      - name: Build frontend
+        run: bun --filter frontend build
+
+  docker:
+    name: docker builds
+    runs-on: ubuntu-24.04
+    needs: build
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Build backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/backend
+          target: production
+          push: false
+      - name: Build frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/frontend
+          build-args: VITE_API_URL=http://localhost:3001/api
+          target: production
+          push: false
+      - name: Validate compose configs
+        run: |
+          docker compose -f docker/docker-compose.dev.yml config --quiet
+          docker compose -f docker/docker-compose.prod.yml config --quiet
+          docker compose -f docker/docker-compose.staging.yml config --quiet

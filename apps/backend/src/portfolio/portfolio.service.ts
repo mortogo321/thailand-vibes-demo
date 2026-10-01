@@ -1,15 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Portfolio, PortfolioDocument } from './schemas/portfolio.schema';
-import { CreatePortfolioDto } from './dto/create-portfolio.dto';
-import { UpdatePortfolioDto } from './dto/update-portfolio.dto';
+import { type Model, Types } from 'mongoose';
+import type { CreatePortfolioDto } from './dto/create-portfolio.dto';
+import type { UpdatePortfolioDto } from './dto/update-portfolio.dto';
+import { Portfolio, type PortfolioDocument } from './schemas/portfolio.schema';
+
+function assertObjectId(id: string): void {
+  if (!Types.ObjectId.isValid(id)) {
+    throw new BadRequestException(`Invalid portfolio id: ${id}`);
+  }
+}
 
 @Injectable()
 export class PortfolioService {
   constructor(
     @InjectModel(Portfolio.name)
-    private portfolioModel: Model<PortfolioDocument>,
+    private readonly portfolioModel: Model<PortfolioDocument>,
   ) {}
 
   async create(createPortfolioDto: CreatePortfolioDto): Promise<Portfolio> {
@@ -25,6 +31,7 @@ export class PortfolioService {
   }
 
   async findOne(id: string): Promise<Portfolio> {
+    assertObjectId(id);
     const portfolio = await this.portfolioModel.findById(id).exec();
     if (!portfolio) {
       throw new NotFoundException(`Portfolio item with ID ${id} not found`);
@@ -32,17 +39,15 @@ export class PortfolioService {
     return portfolio;
   }
 
-  async update(
-    id: string,
-    updatePortfolioDto: UpdatePortfolioDto,
-  ): Promise<Portfolio> {
+  async update(id: string, updatePortfolioDto: UpdatePortfolioDto): Promise<Portfolio> {
+    assertObjectId(id);
     const updatedData = { ...updatePortfolioDto };
     if (updatedData.symbol) {
       updatedData.symbol = updatedData.symbol.toUpperCase();
     }
 
     const portfolio = await this.portfolioModel
-      .findByIdAndUpdate(id, updatedData, { new: true })
+      .findByIdAndUpdate(id, updatedData, { new: true, runValidators: true })
       .exec();
 
     if (!portfolio) {
@@ -52,6 +57,7 @@ export class PortfolioService {
   }
 
   async remove(id: string): Promise<void> {
+    assertObjectId(id);
     const result = await this.portfolioModel.findByIdAndDelete(id).exec();
     if (!result) {
       throw new NotFoundException(`Portfolio item with ID ${id} not found`);

@@ -1,11 +1,16 @@
+import { ConfigProvider } from 'antd';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { ConfigProvider } from 'antd';
 import App from './App';
 import './index.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error('Missing #root element');
+}
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <ConfigProvider
@@ -19,5 +24,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <App />
       </ConfigProvider>
     </BrowserRouter>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

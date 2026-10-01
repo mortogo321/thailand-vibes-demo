@@ -1,28 +1,28 @@
-import { useEffect, useState } from 'react';
-import { observer } from 'mobx-react-lite';
-import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Card,
-  Row,
-  Col,
-  Statistic,
-  Button,
-  Space,
-  Tag,
-  Spin,
-  Alert,
-  Typography,
-  Descriptions,
-} from 'antd';
-import {
+  ArrowDownOutlined,
   ArrowLeftOutlined,
   ArrowUpOutlined,
-  ArrowDownOutlined,
   ReloadOutlined,
 } from '@ant-design/icons';
-import { stockStore } from '../stores/StockStore';
-import { portfolioStore } from '../stores/PortfolioStore';
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Row,
+  Space,
+  Spin,
+  Statistic,
+  Tag,
+  Typography,
+} from 'antd';
 import dayjs from 'dayjs';
+import { observer } from 'mobx-react-lite';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { portfolioStore } from '../stores/PortfolioStore';
+import { stockStore } from '../stores/StockStore';
 
 const { Title, Text } = Typography;
 
@@ -31,18 +31,18 @@ const StockDetailPage = observer(() => {
   const navigate = useNavigate();
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchQuote = async () => {
+  const fetchQuote = useCallback(async () => {
     if (!symbol) return;
     try {
       await stockStore.fetchQuote(symbol);
     } catch (error) {
       console.error('Failed to fetch quote:', error);
     }
-  };
+  }, [symbol]);
 
   useEffect(() => {
-    fetchQuote();
-  }, [symbol]);
+    void fetchQuote();
+  }, [fetchQuote]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -67,19 +67,10 @@ const StockDetailPage = observer(() => {
   return (
     <div>
       <Space style={{ marginBottom: 24 }}>
-        <Button
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate('/')}
-          size="large"
-        >
+        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')} size="large">
           Back to Portfolio
         </Button>
-        <Button
-          icon={<ReloadOutlined />}
-          onClick={handleRefresh}
-          loading={refreshing}
-          size="large"
-        >
+        <Button icon={<ReloadOutlined />} onClick={handleRefresh} loading={refreshing} size="large">
           Refresh
         </Button>
       </Space>
@@ -218,18 +209,14 @@ const StockDetailPage = observer(() => {
               <Descriptions.Item label="Previous Close">
                 ${quote.previousClose.toFixed(2)}
               </Descriptions.Item>
-              <Descriptions.Item label="Volume">
-                {quote.volume.toLocaleString()}
-              </Descriptions.Item>
+              <Descriptions.Item label="Volume">{quote.volume.toLocaleString()}</Descriptions.Item>
               <Descriptions.Item label="Avg Volume">
                 {quote.avgVolume.toLocaleString()}
               </Descriptions.Item>
               <Descriptions.Item label="52 Week High">
                 ${quote.yearHigh.toFixed(2)}
               </Descriptions.Item>
-              <Descriptions.Item label="52 Week Low">
-                ${quote.yearLow.toFixed(2)}
-              </Descriptions.Item>
+              <Descriptions.Item label="52 Week Low">${quote.yearLow.toFixed(2)}</Descriptions.Item>
               <Descriptions.Item label="Market Cap">
                 ${(quote.marketCap / 1e9).toFixed(2)}B
               </Descriptions.Item>

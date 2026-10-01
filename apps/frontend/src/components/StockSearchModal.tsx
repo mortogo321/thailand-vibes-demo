@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Modal, Input, List, Typography, Tag, Spin, Empty } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
+import { Empty, Input, List, Modal, Spin, Tag, Typography } from 'antd';
+import { useState } from 'react';
 import { stocksApi } from '../services/api';
 
 const { Text } = Typography;
@@ -12,6 +12,8 @@ interface StockSearchResult {
   stockExchange: string;
   exchangeShortName: string;
 }
+
+export type { StockSearchResult };
 
 interface StockSearchModalProps {
   visible: boolean;
@@ -58,13 +60,7 @@ function StockSearchModal({ visible, onClose, onSelect }: StockSearchModalProps)
   };
 
   return (
-    <Modal
-      title="Search Stocks"
-      open={visible}
-      onCancel={handleCancel}
-      footer={null}
-      width={600}
-    >
+    <Modal title="Search Stocks" open={visible} onCancel={handleCancel} footer={null} width={600}>
       <Input
         size="large"
         placeholder="Search by symbol or company name..."
@@ -105,15 +101,9 @@ function StockSearchModal({ visible, onClose, onSelect }: StockSearchModalProps)
           )}
         />
       ) : searchQuery.length >= 1 ? (
-        <Empty
-          description="No stocks found"
-          style={{ padding: 40 }}
-        />
+        <Empty description="No stocks found" style={{ padding: 40 }} />
       ) : (
-        <Empty
-          description="Start typing to search for stocks"
-          style={{ padding: 40 }}
-        />
+        <Empty description="Start typing to search for stocks" style={{ padding: 40 }} />
       )}
     </Modal>
   );

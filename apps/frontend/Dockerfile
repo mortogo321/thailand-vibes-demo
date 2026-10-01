@@ -1,75 +1,43 @@
-# Base stage
-FROM node:18-alpine AS base
+# Frontend — React + Vite dashboard (bun-first, pinned runtimes)
+# Build context: apps/frontend
+
+# --- deps: install with bun ---
+FROM oven/bun:1.4.2-alpine AS deps
 WORKDIR /app
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile 2>/dev/null || bun install
 
-# Install pnpm
-RUN npm install -g pnpm@8
-
-# Development stage
-FROM base AS development
+# --- development: vite dev server ---
+FROM oven/bun:1.4.2-alpine AS development
 WORKDIR /app
-
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
-
-# Install all dependencies
-RUN pnpm install --frozen-lockfile
-
-# Copy source
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Expose Vite dev server port
 EXPOSE 5173
+CMD ["bun", "run", "dev", "--host", "0.0.0.0"]
 
-# Start development server
-CMD ["pnpm", "dev", "--host", "0.0.0.0"]
-
-# Builder stage
-FROM base AS builder
+# --- builder: static bundle ---
+FROM oven/bun:1.4.2-alpine AS builder
 WORKDIR /app
-
-# Build arguments
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
+RUN bun run build
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
-
-# Install dependencies
-RUN pnpm install --frozen-lockfile
-
-# Copy source
-COPY . .
-
-# Build the application
-RUN pnpm build
-
-# Production stage with Nginx
-FROM nginx:alpine AS production
-
-# Copy custom nginx config
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy built assets from builder
+# --- production: nginx, non-root ---
+FROM nginx:1.29.8-alpine AS production
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Create non-root user
-RUN addgroup -g 1001 -S nginx && \
-    adduser -S nginx -u 1001 && \
-    chown -R nginx:nginx /usr/share/nginx/html && \
-    chown -R nginx:nginx /var/cache/nginx && \
-    chown -R nginx:nginx /var/log/nginx && \
+RUN addgroup -g 1001 -S appgroup 2>/dev/null || true && \
+    adduser -S appuser -u 1001 -G appgroup 2>/dev/null || adduser -S -u 1001 -G nginx appuser || true && \
+    chown -R 1001:1001 /usr/share/nginx/html && \
+    chown -R 1001:1001 /var/cache/nginx && \
+    chown -R 1001:1001 /var/log/nginx && \
+    chown -R 1001:1001 /etc/nginx/conf.d && \
     touch /var/run/nginx.pid && \
-    chown -R nginx:nginx /var/run/nginx.pid
-
-USER nginx
-
-# Expose port
+    chown 1001:1001 /var/run/nginx.pid
+USER 1001
 EXPOSE 80
-
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:80 || exit 1
-
-# Start nginx
+  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
 CMD ["nginx", "-g", "daemon off;"]

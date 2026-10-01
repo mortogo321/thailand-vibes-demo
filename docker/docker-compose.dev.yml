@@ -1,8 +1,6 @@
-version: '3.9'
-
 services:
   mongodb:
-    image: mongo:8-jammy
+    image: mongo:8.2.11-noble
     container_name: stock-mgmt-mongodb-dev
     restart: unless-stopped
     ports:
@@ -35,7 +33,7 @@ services:
       MONGODB_URI: mongodb://mongodb:27017/stock-management
       PORT: 3001
     env_file:
-      - ../apps/backend/.env
+      - ../apps/backend/.env.example
     volumes:
       - ../apps/backend/src:/app/src
       - ../apps/backend/package.json:/app/package.json
@@ -45,7 +43,7 @@ services:
         condition: service_healthy
     networks:
       - stock-network
-    command: pnpm start:dev
+    command: bun run start:dev
 
   frontend:
     build:
@@ -68,7 +66,7 @@ services:
       - backend
     networks:
       - stock-network
-    command: pnpm dev --host 0.0.0.0
+    command: bun run dev --host 0.0.0.0
 
 volumes:
   mongodb_data:

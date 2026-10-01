@@ -1,13 +1,12 @@
-import { Layout, Typography } from 'antd';
 import { StockOutlined } from '@ant-design/icons';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Layout, Typography } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
 const { Header } = Layout;
 const { Title } = Typography;
 
 function AppHeader() {
   const navigate = useNavigate();
-  const location = useLocation();
 
   return (
     <Header
@@ -18,13 +17,18 @@ function AppHeader() {
         padding: '0 50px',
       }}
     >
-      <div
+      <button
+        type="button"
         style={{
           display: 'flex',
           alignItems: 'center',
           cursor: 'pointer',
+          background: 'transparent',
+          border: 'none',
+          padding: 0,
         }}
         onClick={() => navigate('/')}
+        aria-label="Go to portfolio home"
       >
         <StockOutlined style={{ fontSize: 28, color: '#1890ff', marginRight: 12 }} />
         <Title
@@ -37,7 +41,7 @@ function AppHeader() {
         >
           Stock Portfolio Manager
         </Title>
-      </div>
+      </button>
     </Header>
   );
 }

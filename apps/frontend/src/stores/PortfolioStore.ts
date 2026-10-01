@@ -1,6 +1,17 @@
+import axios from 'axios';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { portfolioApi } from '../services/api';
-import type { Portfolio, CreatePortfolioDto, UpdatePortfolioDto } from '../types';
+import type { CreatePortfolioDto, Portfolio, UpdatePortfolioDto } from '../types';
+
+function apiErrorMessage(error: unknown, fallback: string): string {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: unknown } | undefined;
+    if (typeof data?.message === 'string' && data.message.length > 0) {
+      return data.message;
+    }
+  }
+  return fallback;
+}
 
 class PortfolioStore {
   portfolios: Portfolio[] = [];
@@ -20,9 +31,9 @@ class PortfolioStore {
         this.portfolios = response.data;
         this.loading = false;
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       runInAction(() => {
-        this.error = error.response?.data?.message || 'Failed to fetch portfolios';
+        this.error = apiErrorMessage(error, 'Failed to fetch portfolios');
         this.loading = false;
       });
     }
@@ -38,9 +49,9 @@ class PortfolioStore {
         this.loading = false;
       });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       runInAction(() => {
-        this.error = error.response?.data?.message || 'Failed to add portfolio';
+        this.error = apiErrorMessage(error, 'Failed to add portfolio');
         this.loading = false;
       });
       throw error;
@@ -53,16 +64,19 @@ class PortfolioStore {
     try {
       const response = await portfolioApi.update(id, data);
       runInAction(() => {
-        const index = this.portfolios.findIndex(p => p._id === id);
+        const index = this.portfolios.findIndex((p) => p._id === id);
         if (index !== -1) {
-          this.portfolios[index] = response.data;
+          const updated = response.data;
+          if (updated !== undefined) {
+            this.portfolios[index] = updated;
+          }
         }
         this.loading = false;
       });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       runInAction(() => {
-        this.error = error.response?.data?.message || 'Failed to update portfolio';
+        this.error = apiErrorMessage(error, 'Failed to update portfolio');
         this.loading = false;
       });
       throw error;
@@ -75,12 +89,12 @@ class PortfolioStore {
     try {
       await portfolioApi.delete(id);
       runInAction(() => {
-        this.portfolios = this.portfolios.filter(p => p._id !== id);
+        this.portfolios = this.portfolios.filter((p) => p._id !== id);
         this.loading = false;
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       runInAction(() => {
-        this.error = error.response?.data?.message || 'Failed to delete portfolio';
+        this.error = apiErrorMessage(error, 'Failed to delete portfolio');
         this.loading = false;
       });
       throw error;
@@ -88,9 +102,7 @@ class PortfolioStore {
   }
 
   getPortfolioBySymbol(symbol: string): Portfolio | undefined {
-    return this.portfolios.find(
-      p => p.symbol.toUpperCase() === symbol.toUpperCase()
-    );
+    return this.portfolios.find((p) => p.symbol.toUpperCase() === symbol.toUpperCase());
   }
 }
 

@@ -1,18 +1,24 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
   Body,
-  Param,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Post,
+  Put,
+  UseGuards,
 } from '@nestjs/common';
-import { PortfolioService } from './portfolio.service';
+import { ThrottlerGuard } from '@nestjs/throttler';
+// biome-ignore lint/style/useImportType: NestJS validation metatype needs value imports
 import { CreatePortfolioDto } from './dto/create-portfolio.dto';
+// biome-ignore lint/style/useImportType: NestJS validation metatype needs value imports
 import { UpdatePortfolioDto } from './dto/update-portfolio.dto';
+// biome-ignore lint/style/useImportType: NestJS constructor DI needs a value import
+import { PortfolioService } from './portfolio.service';
 
+@UseGuards(ThrottlerGuard)
 @Controller('portfolio')
 export class PortfolioController {
   constructor(private readonly portfolioService: PortfolioService) {}
@@ -34,10 +40,7 @@ export class PortfolioController {
   }
 
   @Put(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updatePortfolioDto: UpdatePortfolioDto,
-  ) {
+  update(@Param('id') id: string, @Body() updatePortfolioDto: UpdatePortfolioDto) {
     return this.portfolioService.update(id, updatePortfolioDto);
   }
 

@@ -1,6 +1,6 @@
-import { connect, disconnect } from 'mongoose';
+import * as path from 'node:path';
 import * as dotenv from 'dotenv';
-import * as path from 'path';
+import { connect, disconnect } from 'mongoose';
 
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -16,14 +16,17 @@ async function clearDatabase() {
 
     // Import Portfolio model
     const { default: mongoose } = await import('mongoose');
-    const PortfolioSchema = new mongoose.Schema({
-      symbol: String,
-      companyName: String,
-      shares: Number,
-      purchasePrice: Number,
-      purchaseDate: Date,
-      notes: String,
-    }, { timestamps: true });
+    const PortfolioSchema = new mongoose.Schema(
+      {
+        symbol: String,
+        companyName: String,
+        shares: Number,
+        purchasePrice: Number,
+        purchaseDate: Date,
+        notes: String,
+      },
+      { timestamps: true },
+    );
 
     const Portfolio = mongoose.models.Portfolio || mongoose.model('Portfolio', PortfolioSchema);
 
@@ -32,7 +35,6 @@ async function clearDatabase() {
     console.log(`✅ Cleared ${result.deletedCount} portfolio entries\n`);
 
     console.log('✨ Database cleanup completed successfully!\n');
-
   } catch (error) {
     console.error('❌ Error clearing database:', error);
     process.exit(1);

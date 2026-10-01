@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { stocksApi } from '../services/api';
 import type { StockQuote } from '../types';
@@ -21,9 +22,17 @@ class StockStore {
         this.loading = false;
       });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       runInAction(() => {
-        this.error = error.response?.data?.message || 'Failed to fetch stock quote';
+        if (axios.isAxiosError(error)) {
+          const data = error.response?.data as { message?: unknown } | undefined;
+          this.error =
+            typeof data?.message === 'string' && data.message.length > 0
+              ? data.message
+              : 'Failed to fetch stock quote';
+        } else {
+          this.error = 'Failed to fetch stock quote';
+        }
         this.loading = false;
       });
       throw error;

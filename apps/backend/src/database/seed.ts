@@ -1,6 +1,7 @@
-import { connect, disconnect } from 'mongoose';
+import * as path from 'node:path';
 import * as dotenv from 'dotenv';
-import * as path from 'path';
+import type { Model } from 'mongoose';
+import { connect, disconnect } from 'mongoose';
 
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -27,7 +28,7 @@ const samplePortfolio: SeedStock[] = [
     symbol: 'MSFT',
     companyName: 'Microsoft Corporation',
     shares: 30,
-    purchasePrice: 380.50,
+    purchasePrice: 380.5,
     purchaseDate: new Date('2024-02-20'),
     notes: 'Cloud computing leader',
   },
@@ -43,7 +44,7 @@ const samplePortfolio: SeedStock[] = [
     symbol: 'TSLA',
     companyName: 'Tesla, Inc.',
     shares: 15,
-    purchasePrice: 245.00,
+    purchasePrice: 245.0,
     purchaseDate: new Date('2024-01-05'),
     notes: 'EV market leader',
   },
@@ -51,7 +52,7 @@ const samplePortfolio: SeedStock[] = [
     symbol: 'NVDA',
     companyName: 'NVIDIA Corporation',
     shares: 20,
-    purchasePrice: 495.30,
+    purchasePrice: 495.3,
     purchaseDate: new Date('2024-02-01'),
     notes: 'AI chip manufacturer',
   },
@@ -59,7 +60,7 @@ const samplePortfolio: SeedStock[] = [
     symbol: 'AMZN',
     companyName: 'Amazon.com Inc.',
     shares: 40,
-    purchasePrice: 175.20,
+    purchasePrice: 175.2,
     purchaseDate: new Date('2024-03-15'),
     notes: 'E-commerce and cloud giant',
   },
@@ -76,16 +77,21 @@ async function seed() {
 
     // Import Portfolio model
     const { default: mongoose } = await import('mongoose');
-    const PortfolioSchema = new mongoose.Schema({
-      symbol: { type: String, required: true, uppercase: true },
-      companyName: { type: String, required: true },
-      shares: { type: Number, required: true, min: 0 },
-      purchasePrice: { type: Number, required: true, min: 0 },
-      purchaseDate: Date,
-      notes: String,
-    }, { timestamps: true });
+    type SeedDoc = SeedStock;
+    const PortfolioSchema = new mongoose.Schema<SeedDoc>(
+      {
+        symbol: { type: String, required: true, uppercase: true },
+        companyName: { type: String, required: true },
+        shares: { type: Number, required: true, min: 0 },
+        purchasePrice: { type: Number, required: true, min: 0 },
+        purchaseDate: Date,
+        notes: String,
+      },
+      { timestamps: true },
+    );
 
-    const Portfolio = mongoose.models.Portfolio || mongoose.model('Portfolio', PortfolioSchema);
+    const Existing = mongoose.models['Portfolio'] as Model<SeedDoc> | undefined;
+    const Portfolio = Existing ?? mongoose.model<SeedDoc>('Portfolio', PortfolioSchema);
 
     // Clear existing data
     const deleteResult = await Portfolio.deleteMany({});
@@ -95,20 +101,20 @@ async function seed() {
     const result = await Portfolio.insertMany(samplePortfolio);
     console.log(`✅ Successfully seeded ${result.length} portfolio entries:\n`);
 
-    result.forEach((item: any) => {
+    result.forEach((item: SeedDoc) => {
       console.log(`   📊 ${item.symbol} - ${item.companyName}`);
       console.log(`      Shares: ${item.shares} @ $${item.purchasePrice.toFixed(2)}`);
       console.log(`      Total Value: $${(item.shares * item.purchasePrice).toFixed(2)}`);
       console.log('');
     });
 
-    const totalValue = result.reduce((sum: number, item: any) =>
-      sum + (item.shares * item.purchasePrice), 0
+    const totalValue = result.reduce(
+      (sum: number, item: SeedDoc) => sum + item.shares * item.purchasePrice,
+      0,
     );
 
     console.log(`💰 Total Portfolio Value: $${totalValue.toFixed(2)}\n`);
     console.log('✨ Seeding completed successfully!\n');
-
   } catch (error) {
     console.error('❌ Error seeding database:', error);
     process.exit(1);

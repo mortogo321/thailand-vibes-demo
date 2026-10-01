@@ -1,8 +1,8 @@
-import { Routes, Route } from 'react-router-dom';
 import { Layout } from 'antd';
+import { Route, Routes } from 'react-router-dom';
+import AppHeader from './components/AppHeader';
 import PortfolioPage from './pages/PortfolioPage';
 import StockDetailPage from './pages/StockDetailPage';
-import AppHeader from './components/AppHeader';
 
 const { Content } = Layout;
 
