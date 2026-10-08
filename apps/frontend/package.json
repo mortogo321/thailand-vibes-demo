@@ -16,7 +16,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.4",
-    "mobx": "^7.0.5",
+    "mobx": "^7.0.6",
     "mobx-react-lite": "^5.1.0",
     "antd": "^6.6.5",
     "@ant-design/icons": "^6.3.4",

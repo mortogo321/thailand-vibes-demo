@@ -49,7 +49,7 @@
         "antd": "^6.6.5",
         "axios": "^1.20.0",
         "dayjs": "^1.11.23",
-        "mobx": "^7.0.5",
+        "mobx": "^7.0.6",
         "mobx-react-lite": "^5.1.0",
         "react": "^19.3.0",
         "react-dom": "^19.3.0",
@@ -710,7 +710,7 @@
 
     "minimist": ["minimist@1.2.8", "", {}, "sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA=="],
 
-    "mobx": ["mobx@7.0.5", "", {}, "sha512-Q3TZfmgJhhHfEVyQ2Wl+1Q9nkfH+y3DnoAB/Gny/gm7Yga43kMdwmfwa8lO4aiGmkty3NNy4rgjfjVM1D8vYAQ=="],
+    "mobx": ["mobx@7.0.6", "", {}, "sha512-VJwjVS5K/rojqPSOoDYlXaYl38Lj+gDfLOFeJ/3Pbdh5ITbAO4ks9RgL0TeRI0bydRZ7b/7WrtPPb9Onuj/pcA=="],
 
     "mobx-react-lite": ["mobx-react-lite@5.1.0", "", { "peerDependencies": { "mobx": "^7.0.0", "react": "^18 || ^19" } }, "sha512-++LQTCRr4FJCWuaEvYl5gCtGBwOpOwrnWjm9uhCUDI5nmkzLR8eT1jgMeYfJ8wc88YOYyC/ygjw2KpYPBYGsww=="],
 
